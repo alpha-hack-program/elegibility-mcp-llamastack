@@ -1,3 +1,28 @@
 🎉 Your vLLM + Llama Stack-powered Demo has been successfully deployed!
 
 You can access it from project **{{ .Release.Namespace }}**
+
+Models deployed:
+{{- range .Values.models }}
+- {{ .name }}:
+  URL: "{{ "http://" }}{{ .name }}-predictor:8080/v1"
+  MODEL: {{ include "rag-lsd.envVarName" .name }}_MODEL: "{{ .name }}"
+{{- if .api_key }}
+  API_KEY:: "{{ .api_key }}"
+{{- end }}
+{{- if .tlsVerify }}
+  TLS_VERIFY: "{{ .tlsVerify }}"
+{{- end }}
+{{- if .maxTokens }}
+  MAX_TOKENS: "{{ .maxTokens }}"
+{{- end }}
+{{- end }}
+
+MCP Servers deployed:
+{{- range .Values.mcpServers }}
+- {{ .id }}:
+    - Git: {{ .vcs.uri }} / {{ .vcs.ref }}
+    - Runtime: {{ .runtime }}
+    - URI: uri: {{ .protocol }}://{{ .host }}:{{ .port }}{{ .uri }}
+{{- end }}
+

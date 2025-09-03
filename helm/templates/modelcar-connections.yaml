@@ -7,6 +7,7 @@ metadata:
   namespace: {{ $.Values.namespace }}
   labels:
     opendatahub.io/dashboard: 'true'
+    app.kubernetes.io/part-of: {{ $.Values.partOf }}
   annotations:
     opendatahub.io/connection-type-ref: uri-v1
     openshift.io/description: ''

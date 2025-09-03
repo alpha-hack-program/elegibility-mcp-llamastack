@@ -88,6 +88,14 @@ PROJECT="elegibility-mcp-llamastack"
 oc new-project ${PROJECT}
 ``` 
 
+Label project with
+- modelmesh-enabled: 'false'
+- opendatahub.io/dashboard: 'true'
+
+```bash
+oc label namespace ${PROJECT} modelmesh-enabled=false opendatahub.io/dashboard=true
+```
+
 ### Install with Helm
 
 ```

@@ -1,4 +1,4 @@
-# vllm-cpu
+# VLLM_CPU_QUICKSTART
 
 Welcome to the vLLM CPU quickstart!
 Use this to quickly get a vLLM up and running in your environment.  

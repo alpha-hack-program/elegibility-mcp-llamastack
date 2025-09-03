@@ -4,12 +4,13 @@ vllmImage: quay.io/modh/vllm:rhoai-2.23-cuda
 app: elegibility-lsd
 namespace: elegibility-mcp-llamastack
 partOf: elegibility-mcp-llamastack
-lsdImage: quay.io/your-registry/lsd:latest
-lsdPlaygroundImage: quay.io/your-registry/lsd-playground:latest
+
+lsdImage: quay.io/opendatahub/llama-stack:odh
+lsdPlaygroundImage: quay.io/rh-aiservices-bu/llama-stack-playground:0.2.11
 lsdPort: 8321
+
 milvusDbPath: /tmp/milvus.db
 fmsOchestratorUrl: http://localhost:8080
-mcpServers: []
 
 models:
   # - name: granite-3-3-8b

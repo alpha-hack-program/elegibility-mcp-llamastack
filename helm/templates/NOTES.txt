@@ -1,3 +1,3 @@
-🎉 Your vLLM-powered TinyLlama AI Model has been successfully deployed!
+🎉 Your vLLM + Llama Stack-powered Demo has been successfully deployed!
 
-You can access the Workbench through the Data Science project **{{ .Release.Namespace }}**
+You can access it from project **{{ .Release.Namespace }}**

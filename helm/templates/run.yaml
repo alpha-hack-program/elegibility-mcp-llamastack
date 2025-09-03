@@ -150,7 +150,7 @@ stringData:
     - toolgroup_id: {{ .id }}
       provider_id: {{ .provider_id }}
       mcp_endpoint:
-        uri: {{ .protocol }}://{{ .host }}:{{ .port }}
+        uri: {{ .protocol }}://{{ .host }}:{{ .port }}{{ .uri }}
     {{- end }}
     
     server:

@@ -124,7 +124,11 @@ Inside the project you can see Workbenches, open up the one for AnythingLLM.
 Finally, you can create a new Workspace in AnythingLLM and start chatting with your model! :)
 ![AnythingLLM](images/anythingllm-1.png)
 
+## Example queries
 
+- My mother had an accident and she's at the hospital, I have to take care of her, can I get access to the unpaid leave aid?
+- I have just adoopted two children aged 3 and 5, am I elegible for the unpaid leave aid?
+- I'm a single mom and I just had a baby, may I get access to the unpaid leave aid?
 
 ## Uninstall
 ```

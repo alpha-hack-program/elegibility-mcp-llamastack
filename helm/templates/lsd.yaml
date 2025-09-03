@@ -1,0 +1,109 @@
+---
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: {{ .Values.app }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.app }}
+    app.kubernetes.io/component: {{ .Values.app }}
+    app.kubernetes.io/instance: {{ .Values.app }}
+    app.kubernetes.io/name: {{ .Values.app }}
+    app.kubernetes.io/part-of: {{ .Values.partOf }}
+    app.openshift.io/runtime: python
+spec:
+  replicas: 1
+  server:
+    containerSpec:
+      env:
+        {{- $appName := .Values.app }}
+        {{- range .Values.models }}
+        - name: {{ include "rag-lsd.envVarName" .name }}_MODEL
+          valueFrom:
+            secretKeyRef:
+              key: {{ include "rag-lsd.envVarName" .name }}_MODEL
+              name: {{ $appName }}-secret
+        - name: {{ include "rag-lsd.envVarName" .name }}_URL
+          valueFrom:
+            secretKeyRef:
+              key: {{ include "rag-lsd.envVarName" .name }}_URL
+              name: {{ $appName }}-secret
+        {{- if .api_key }}
+        - name: {{ include "rag-lsd.envVarName" .name }}_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ include "rag-lsd.envVarName" .name }}_API_KEY
+              name: {{ $appName }}-secret
+        {{- end }}
+        {{- if .tls_verify }}
+        - name: {{ include "rag-lsd.envVarName" .name }}_TLS_VERIFY
+          valueFrom:
+            secretKeyRef:
+              key: {{ include "rag-lsd.envVarName" .name }}_TLS_VERIFY
+              name: {{ $appName }}-secret
+        {{- end }}
+        {{- if .max_tokens }}
+        - name: {{ include "rag-lsd.envVarName" .name }}_MAX_TOKENS
+          valueFrom:
+            secretKeyRef:
+              key: {{ include "rag-lsd.envVarName" .name }}_MAX_TOKENS
+              name: {{ $appName }}-secret
+        {{- end }}
+        {{- end }}
+        - name: MILVUS_DB_PATH
+          value: {{ .Values.milvusDbPath }}
+        - name: FMS_ORCHESTRATOR_URL
+          value: {{ .Values.fmsOchestratorUrl }}
+      name: llama-stack
+      port: {{ .Values.lsdPort | default 8321 }}
+      {{- if .Values.lsdResources }}
+      resources:
+        {{- if .Values.lsdResources.limits }}
+        limits:
+          cpu: {{ .Values.lsdResources.limits.cpu | default "2" }}
+          memory: {{ .Values.lsdResources.limits.memory | default "12Gi" }}
+        {{- end }}
+        {{- if .Values.lsdResources.requests }}
+        requests:
+          cpu: {{ .Values.lsdResources.requests.cpu | default "250m" }}
+          memory: {{ .Values.lsdResources.requests.memory | default "1Gi" }}
+        {{- end }}
+      {{- end }}
+
+    podOverrides:
+      # Define volumes at the pod level
+      volumes:
+        - name: run-config
+          secret:
+            secretName: {{ .Values.app }}-run
+            items:
+              - key: run.yaml
+                path: run.yaml
+            defaultMode: 0644
+      # Mount the volume in the container
+      volumeMounts:
+        - name: run-config
+          mountPath: /opt/app-root/run.yaml
+          subPath: run.yaml
+          readOnly: true
+    distribution:
+      image: '{{ .Values.lsdImage }}'
+    storage:
+      size: 5Gi
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: "{{ .Values.app }}-route"
+  namespace: {{ .Values.namespace }}
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: "{{ .Values.app }}-service"
+    weight: 100
+  wildcardPolicy: None

@@ -1,13 +1,17 @@
+{{- range .Values.models }}
+---
 kind: Secret
 apiVersion: v1
 metadata:
-  name: tinyllama-10-on-quayio
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
   labels:
     opendatahub.io/dashboard: 'true'
   annotations:
     opendatahub.io/connection-type-ref: uri-v1
     openshift.io/description: ''
-    openshift.io/display-name: tinyllama 1.0 on quay.io
-data:
-  URI: b2NpOi8vcXVheS5pby9yaC1haXNlcnZpY2VzLWJ1L3RpbnlsbGFtYToxLjA=
+    openshift.io/display-name: {{ .name }}
+stringData:
+  URI: oci://{{ .image }}
 type: Opaque
+{{- end }}

@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.app }}-playground"
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: "{{ .Values.app }}-playground"
+    app.kubernetes.io/component: "{{ .Values.app }}-playground"
+    app.kubernetes.io/instance: "{{ .Values.app }}-playground"
+    app.kubernetes.io/name: "{{ .Values.app }}-playground"
+    app.kubernetes.io/part-of: "{{ .Values.partOf }}"
+    app.openshift.io/runtime: "python"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{ .Values.app }}-playground"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.app }}-playground"
+    spec:
+      containers:
+        - name: "{{ .Values.app }}-playground"
+          image: {{ .Values.lsdPlaygroundImage }}
+          ports:
+            - containerPort: 8501
+              protocol: TCP
+              name: 8501-tcp
+          resources:
+            limits:
+              cpu: '1'
+              memory: 4Gi
+            requests:
+              cpu: 250m
+              memory: 500Mi
+          env:
+            - name: LLAMA_STACK_ENDPOINT
+              value: "http://{{ .Values.app }}-service:{{ .Values.lsdPort }}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.app }}-playground"
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: "{{ .Values.app }}-playground"
+    app.kubernetes.io/component: "{{ .Values.app }}-playground"
+    app.kubernetes.io/instance: "{{ .Values.app }}-playground"
+    app.kubernetes.io/name: "{{ .Values.app }}-playground"
+    app.kubernetes.io/part-of: "{{ .Values.partOf }}"
+    app.openshift.io/runtime: "python"
+spec:
+  selector:
+    app: "{{ .Values.app }}-playground"
+  ports:
+    - name: 8501-tcp
+      port: 8501
+      targetPort: 8501
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: "{{ .Values.app }}-playground"
+  namespace: {{ .Values.namespace }}
+spec:
+  port:
+    targetPort: 8501-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: "{{ .Values.app }}-playground"
+    weight: 100
+  wildcardPolicy: None

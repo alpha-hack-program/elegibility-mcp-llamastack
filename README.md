@@ -83,7 +83,7 @@ git clone https://github.com/rh-ai-quickstart/llm-cpu-serving.git && \
 ### Create the project
 
 ```bash
-PROJECT="tinyllama-cpu-demo"
+PROJECT="elegibility-mcp-llamastack"
 
 oc new-project ${PROJECT}
 ``` 
@@ -91,8 +91,8 @@ oc new-project ${PROJECT}
 ### Install with Helm
 
 ```
-helm install llm-cpu-serving helm/ \
-    --namespace  ${PROJECT} 
+helm install elegibility-mcp-llamastack helm/ \
+    --namespace ${PROJECT} 
 ```
 
 ### Wait for pods

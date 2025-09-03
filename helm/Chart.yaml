@@ -1,4 +1,4 @@
 apiVersion: v2
-description: A quickstart for TinyLlama and AnythingLLM
-name: vllm-cpu
+description: A quickstart for LlamaStack distribution on OpenShift featuring an MCPServer for Eligibility
+name: elegibility-mcp-quickstart
 version: 1.0.0

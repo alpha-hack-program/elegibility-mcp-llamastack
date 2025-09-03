@@ -1,0 +1,137 @@
+# Create a deployment, service and route for each of .Values.mcpServers
+{{- $appName := .Values.app }}
+{{- $namespace := .Values.namespace }}
+{{- $partOf := .Values.partOf }}
+
+{{- range .Values.mcpServers }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .host }}
+  namespace: {{ $namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    alpha.image.policy.openshift.io/resolve-names: '*'
+    app.openshift.io/route-disabled: "false"
+    app.openshift.io/vcs-ref: {{ .vcs.ref }}
+    app.openshift.io/vcs-uri: {{ .vcs.uri }}
+  labels:
+    app: {{ .host }}
+    app.kubernetes.io/component: {{ .host }}
+    app.kubernetes.io/instance: {{ .host }}
+    app.kubernetes.io/name: {{ .host }}
+    app.kubernetes.io/part-of: {{ $partOf }}
+    app.openshift.io/runtime: {{ .runtime | default "nodejs" }}
+  name: {{ .host }}
+  namespace: {{ $namespace }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ .replicas | default 1 }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: {{ .host }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .host }}
+        deployment: {{ .host }}
+    spec:
+      serviceAccountName: {{ .host }}
+      containers:
+        - image: {{ .image }}
+          imagePullPolicy: Always
+          name: {{ .host }}
+          ports:
+            - name: {{ .port }}-tcp
+              containerPort: {{ .port }}
+              protocol: TCP
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          {{- if .resources }}
+          resources:
+            {{- if .resources.limits }}
+            limits:
+              cpu: {{ .resources.limits.cpu | default "1" }}
+              memory: {{ .resources.limits.memory | default "2Gi" }}
+            {{- end }}
+            {{- if .resources.requests }}
+            requests:
+              cpu: {{ .resources.requests.cpu | default "250m" }}
+              memory: {{ .resources.requests.memory | default "256mi" }}
+            {{- end }}
+          {{- end }}
+          env:
+            - name: BIND_ADDRESS
+              value: "0.0.0.0:{{ .port }}"
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app.openshift.io/vcs-ref: {{ .vcs.ref }}
+    app.openshift.io/vcs-uri: {{ .vcs.uri }}
+  labels:
+    app: {{ .host }}
+    app.kubernetes.io/component: {{ .host }}
+    app.kubernetes.io/instance: {{ .host }}
+    app.kubernetes.io/name: {{ .host }}
+    app.kubernetes.io/part-of: {{ $partOf }}
+    app.openshift.io/runtime: {{ .runtime | default "nodejs" }}
+  name: {{ .host }}
+  namespace: {{ $namespace }}
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: {{ .port }}-tcp
+      port: {{ .port }}
+      protocol: TCP
+      targetPort: {{ .port }}
+  selector:
+    app: {{ .host }}
+    deployment: {{ .host }}
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: {{ .host }}
+    app.kubernetes.io/component: {{ .host }}
+    app.kubernetes.io/instance: {{ .host }}
+    app.kubernetes.io/name: {{ .host }}
+    app.kubernetes.io/part-of: {{ $partOf }}
+    app.openshift.io/runtime: {{ .runtime | default "nodejs" }}
+  name: {{ .host }}
+  namespace: {{ $namespace }}
+spec:
+  port:
+    targetPort: {{ .port }}-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ .host }}
+    weight: 100
+  wildcardPolicy: None
+{{- end }}

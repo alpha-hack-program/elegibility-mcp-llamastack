@@ -1,1 +1,94 @@
----
+vllmImage: quay.io/modh/vllm:rhoai-2.23-cuda
+
+# Application configuration
+app: elegibility-lsd
+namespace: elegibility-mcp-llamastack
+partOf: elegibility-mcp-llamastack
+lsdImage: quay.io/your-registry/lsd:latest
+lsdPlaygroundImage: quay.io/your-registry/lsd-playground:latest
+lsdPort: 8321
+milvusDbPath: /tmp/milvus.db
+fmsOchestratorUrl: http://localhost:8080
+mcpServers: []
+
+models:
+  # - name: granite-3-3-8b
+  #   displayName: Granite 3.3 8B
+  #   id: ibm-granite/granite-3.3-8b-instruct
+  #   image: quay.io/redhat-ai-services/modelcar-catalog:granite-3.3-8b-instruct
+  #   maxModelLen: '15000'
+  #   maxTokens: '4096' # llama stack vllm max token, default is 4096
+  #   tlsVerify: false
+  #   externalAccess: true
+  #   runtime:
+  #     templateName: vllm-serving-template
+  #     templateDisplayName: vLLM Serving Template
+  #     image: quay.io/modh/vllm:rhoai-2.23-cuda
+  #     resources:
+  #       limits:
+  #         cpu: '8'
+  #         memory: 24Gi
+  #       requests:
+  #         cpu: '6'
+  #         memory: 24Gi
+  #   accelerator:
+  #     max: '1'
+  #     min: '1'
+  #     productName: NVIDIA-A10G
+  #   args:
+  #     - '--enable-auto-tool-choice'
+  #     - '--tool-call-parser'
+  #     - 'granite'
+  #     - '--chat-template'
+  #     - '/app/data/template/tool_chat_template_granite.jinja'
+  - name: llama-3-1-8b-w4a16
+    displayName: Llama 3.1 8B
+    id: RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16
+    image: quay.io/redhat-ai-services/modelcar-catalog:llama-3.2-8b-instruct-quantized.w4a16
+    maxModelLen: '15000' # vllm max model len
+    maxTokens: '4096' # llama stack vllm max token, default is 4096
+    tlsVerify: false
+    externalAccess: true
+    runtime:
+      templateName: vllm-serving-template
+      templateDisplayName: vLLM Serving Template
+      image: quay.io/modh/vllm:rhoai-2.23-cuda
+      resources:
+        limits:
+          cpu: '8'
+          memory: 24Gi
+        requests:
+          cpu: '6'
+          memory: 24Gi
+    accelerator:
+      max: '1'
+      min: '1'
+      productName: NVIDIA-A10G
+    args:
+      - --enable-auto-tool-choice
+      - --tool-call-parser
+      - llama3_json
+      - --chat-template
+      - /app/data/template/tool_chat_template_llama3.1_json.jinja
+
+mcpServers:
+  - id: mcp::bon-elegibility-engine
+    provider_id: model-context-protocol
+    vcs:
+      uri: https://github.com/alpha-hack-program/elegibility-engine-mcp-rs.git
+      ref: main
+      path: .
+    image: quay.io/atarazana/elegibility-engine-mcp-rs:latest
+    mcp_transport: "sse"
+    protocol: "http"
+    host: elegibility-engine
+    port: 8000
+    uri: "/sse"
+    replicas: 1
+    resources:
+      limits:
+        cpu: '2'
+        memory: 4Gi
+      requests:
+        cpu: 250m
+        memory: 500Mi

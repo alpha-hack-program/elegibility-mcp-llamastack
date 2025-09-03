@@ -1,0 +1,188 @@
+{{- range .Values.models }}
+---
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    openshift.io/display-name: "{{ .displayName }}"
+    security.opendatahub.io/enable-auth: '{{ default false .enableAuth }}'
+    {{- if default true .rawDeployment }}
+    serving.kserve.io/deploymentMode: RawDeployment
+    {{- else }}
+    serving.knative.openshift.io/enablePassthrough: 'true'
+    sidecar.istio.io/inject: 'true'
+    sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+    {{- end }}
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    opendatahub.io/dashboard: 'true'
+    app.kubernetes.io/part-of: {{ $.Values.app }}
+    {{- if .additionalLabels }}
+    {{- range $key, $value := .additionalLabels }}
+    {{ $key }}: "{{ $value }}"
+    {{- end }}
+    {{- end }}
+spec:
+  predictor:
+    maxReplicas: {{ default 1 .maxReplicas }}
+    minReplicas: 1
+    model:
+      modelFormat:
+        name: {{ default "vLLM" .format }}
+      name: ''
+      runtime: {{ .name }}
+      {{/* If model.image is set, it will override the connection, else it will use the connection */}}
+      {{- if .image }}
+      storageUri: 'oci://{{ .image }}'
+      {{- else }}
+      storage:
+        key: aws-connection-{{ .connection.name }}
+        path: "{{ printf "%s/%s" .root .id }}"
+      {{- end }}  
+      resources:
+        {{/* If any or accelator max or limits are set, then the limits will be set accordingly */}}
+        {{- if or .accelerator.max .runtime.resources.limits.cpu .runtime.resources.limits.memory }}
+        limits:
+          {{- if .accelerator.max }}    
+          nvidia.com/gpu: '{{ .accelerator.max }}'
+          {{- end }}
+          {{- if .runtime.resources.limits.cpu }}
+          cpu: '{{ .runtime.resources.limits.cpu }}'
+          {{- end }}
+          {{- if .runtime.resources.limits.memory }}
+          memory: '{{ .runtime.resources.limits.memory }}'
+          {{- end }}
+        {{- end }}
+        requests:
+          # If any or accelator min or requests are set, then the requests will be set accordingly
+          {{- if or .accelerator.min .runtime.resources.requests.cpu .runtime.resources.requests.memory }}
+          {{- if .accelerator.min }}
+          nvidia.com/gpu: '{{ .accelerator.min }}'
+          {{- end }}
+          {{- if .runtime.resources.requests.cpu }}
+          cpu: '{{ .runtime.resources.requests.cpu }}'
+          {{- end }}
+          {{- if .runtime.resources.requests.memory }}
+          memory: '{{ .runtime.resources.requests.memory }}'
+          {{- end }}
+          {{- end }}
+    {{- if .accelerator.min }}
+    tolerations:
+      - effect: NoSchedule
+        key: nvidia.com/gpu
+        operator: Exists
+    {{- end }}
+    {{- if .accelerator.productName }}
+    nodeSelector:
+      nvidia.com/gpu.product: {{ .accelerator.productName }}
+    {{- end }}
+{{- if and (default true .rawDeployment) .externalAccess }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .name }}-predictor
+  namespace: {{ $.Values.namespace }}
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  to:
+    kind: Service
+    name: {{ .name }}-predictor
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}
+---
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    opendatahub.io/accelerator-name: migrated-gpu
+    opendatahub.io/apiProtocol: {{ default "REST" .apiProtocol }}
+    opendatahub.io/template-display-name: "{{ .runtime.templateDisplayName }}"
+    opendatahub.io/template-name: "{{ .runtime.templateName }}"
+    openshift.io/display-name: "{{ .displayName }}"
+    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  annotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: '8080'
+  containers:
+    - args:
+        - '--port=8080'
+        - '--model=/mnt/models'
+        - '--served-model-name={{ "{{.Name}}" }}'
+        {{- if .maxModelLen }}
+        - '--max-model-len'
+        - '{{ .maxModelLen }}'
+        {{- end }}
+        {{- /* If productName contains T4, then use float16 and tensor-parallel-size */ -}}
+        {{- if .accelerator.productName | regexMatch "T4" }}
+        - '--dtype'
+        - float16
+        - '--tensor-parallel-size={{ .accelerator.max }}'
+        {{- end }}
+        - '--distributed-executor-backend=mp'
+        {{- if .embeddingsModel }}
+        - '--trust-remote-code'
+        {{- end }}
+        {{- /* https://docs.vllm.ai/en/latest/features/tool_calling.html#ibm-granite */ -}}
+        {{- if .toolCallParser }}
+        - '--tool-call-parser'
+        - '{{ .toolCallParser }}'
+        {{- end }}
+        {{- if .chatTemplate }}
+        - '--chat-template'
+        - '{{ .chatTemplate }}'
+        {{- end }}
+        {{- if .args }}
+        {{- range .args }}
+        - '{{ . }}'
+        {{- end }}
+        {{- end }}
+      command:
+        - python
+        - '-m'
+        - vllm.entrypoints.openai.api_server
+      env:
+        - name: HF_HOME
+          value: /tmp/hf_home
+        - name: VLLM_CACHE_ROOT
+          value: /tmp
+      image: '{{ .runtime.image }}'
+      name: kserve-container
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+      volumeMounts:
+        - mountPath: /dev/shm
+          name: shm
+      readinessProbe:
+        tcpSocket:
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 30
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 3
+  multiModel: false
+  supportedModelFormats:
+    - autoSelect: true
+      name: {{ default "vLLM" .format }}
+  volumes:
+    - emptyDir:
+        medium: Memory
+        sizeLimit: {{ default "2Gi" .shmSizeLimit }}
+      name: shm
+{{- end }}

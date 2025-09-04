@@ -46,13 +46,38 @@ spec:
         app.kubernetes.io/component: loader
     spec:
       restartPolicy: Never
+      initContainers:
+      - name: deterministic-delay-and-health-check
+        image: curlimages/curl:8.5.0
+        command: ['sh', '-c']
+        args:
+          - |
+            set -e
+            
+            # Try to reach /docs with LLAMA_STACK_HOST and LLAMA_STACK_PORT for MAX_RETRIES times and sleep DELAY seconds between each try
+            MAX_RETRIES={{ .Values.loaderJobRetries | default 10 }}
+            DELAY={{ .Values.loaderDelay | default 5 | toString | quote }}
+            HEALTH_CHECK_URL=http://{{ .Values.app }}-service:{{ .Values.lsdPort }}/docs
+            for i in $(seq 1 $MAX_RETRIES); do
+              if curl -f $HEALTH_CHECK_URL; then
+                break
+              fi
+              sleep $DELAY
+            done
+            if [ $i -eq $MAX_RETRIES ]; then
+              echo "Failed to reach /docs after $MAX_RETRIES tries"
+              exit 1
+            fi
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.app }}-loader-config
       containers:
       - name: loader
         image: "{{ .Values.loaderImage }}"
         imagePullPolicy: Always
         args:
         - --delay
-        - {{ .Values.loaderDelay | toString | quote }}
+        - {{ .Values.loaderDelay | default 0 | toString | quote }}
         envFrom:
         - configMapRef:
             name: {{ .Values.app }}-loader-config
@@ -70,4 +95,4 @@ spec:
       - name: docs-volume
         configMap:
           name: {{ .Values.app }}-documents
-  backoffLimit: 50
+  backoffLimit: {{ .Values.loaderJobRetries | default 3 }}

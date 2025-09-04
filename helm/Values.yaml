@@ -12,9 +12,11 @@ lsdPort: 8321
 lsdEmbeddingModel: granite-embedding-125m
 lsdEmbeddingDimension: 768
 lsdEmbeddingModelProvider: sentence-transformers
+lsdChunkSizeInTokens: 256
 
 loaderImage: quay.io/atarazana/rag-loader:0.1.1
 loaderDelay: 10
+loaderJobRetries: 30
 
 milvusDbPath: /tmp/milvus.db
 fmsOchestratorUrl: http://localhost:8080
@@ -42,9 +44,10 @@ models:
   #         cpu: '6'
   #         memory: 24Gi
   #   accelerator:
+  #     type: nvidia.com/gpu
   #     max: '1'
   #     min: '1'
-  #     productName: NVIDIA-A10G
+  #     # productName: NVIDIA-A10G
   #   args:
   #     - '--enable-auto-tool-choice'
   #     - '--tool-call-parser'
@@ -71,9 +74,12 @@ models:
           cpu: '6'
           memory: 24Gi
     accelerator:
-      max: '1'
-      min: '1'
+      type: nvidia.com/gpu
+      # type: gaudi.com/gpu
+      max: '2'
+      min: '2'
       productName: NVIDIA-A10G-SHARED
+      # productName: T4-SHARED
     args:
       - --enable-auto-tool-choice
       - --tool-call-parser
@@ -98,8 +104,8 @@ mcpServers:
     replicas: 1
     resources:
       limits:
-        cpu: '2'
-        memory: 4Gi
+        cpu: 500m
+        memory: 256Mi
       requests:
         cpu: 250m
-        memory: 500Mi
+        memory: 1280Mi

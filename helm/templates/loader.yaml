@@ -17,7 +17,7 @@ data:
   LLAMA_STACK_PORT: {{ .Values.lsdPort | toString | quote }}
   LLAMA_STACK_SECURE: "False"
   DOCS_FOLDER: "{{ .Values.docsFolder }}"
-  CHUNK_SIZE_IN_TOKENS: "256"
+  CHUNK_SIZE_IN_TOKENS: "{{ .Values.lsdChunkSizeInTokens }}"
 
 ---
 apiVersion: batch/v1
@@ -58,14 +58,14 @@ spec:
             MAX_RETRIES={{ .Values.loaderJobRetries | default 10 }}
             DELAY={{ .Values.loaderDelay | default 5 | toString | quote }}
             HEALTH_CHECK_URL=http://{{ .Values.app }}-service:{{ .Values.lsdPort }}/docs
-            for i in $(seq 1 $MAX_RETRIES); do
+            for i in $(seq 1 ${MAX_RETRIES}); do
               if curl -f $HEALTH_CHECK_URL; then
                 break
               fi
-              sleep $DELAY
+              sleep ${DELAY}
             done
-            if [ $i -eq $MAX_RETRIES ]; then
-              echo "Failed to reach /docs after $MAX_RETRIES tries"
+            if [ $i -eq ${MAX_RETRIES} ]; then
+              echo "Failed to reach /docs after ${MAX_RETRIES} tries"
               exit 1
             fi
         envFrom:

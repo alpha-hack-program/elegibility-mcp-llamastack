@@ -46,7 +46,7 @@ spec:
         {{- if or .accelerator.max .runtime.resources.limits.cpu .runtime.resources.limits.memory }}
         limits:
           {{- if .accelerator.max }}    
-          nvidia.com/gpu: '{{ .accelerator.max }}'
+          {{ .accelerator.type }}: '{{ .accelerator.max }}'
           {{- end }}
           {{- if .runtime.resources.limits.cpu }}
           cpu: '{{ .runtime.resources.limits.cpu }}'
@@ -59,7 +59,7 @@ spec:
           # If any or accelator min or requests are set, then the requests will be set accordingly
           {{- if or .accelerator.min .runtime.resources.requests.cpu .runtime.resources.requests.memory }}
           {{- if .accelerator.min }}
-          nvidia.com/gpu: '{{ .accelerator.min }}'
+          {{ .accelerator.type }}: '{{ .accelerator.min }}'
           {{- end }}
           {{- if .runtime.resources.requests.cpu }}
           cpu: '{{ .runtime.resources.requests.cpu }}'
@@ -76,7 +76,7 @@ spec:
     {{- end }}
     {{- if .accelerator.productName }}
     nodeSelector:
-      nvidia.com/gpu.product: {{ .accelerator.productName }}
+      {{ .accelerator.type }}.product: {{ .accelerator.productName }}
     {{- end }}
 {{- if and (default true .rawDeployment) .externalAccess }}
 ---
@@ -109,7 +109,7 @@ metadata:
     opendatahub.io/template-display-name: "{{ .runtime.templateDisplayName }}"
     opendatahub.io/template-name: "{{ .runtime.templateName }}"
     openshift.io/display-name: "{{ .displayName }}"
-    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+    opendatahub.io/recommended-accelerators: '["{{ .accelerator.type }}"]'
   name: {{ .name }}
   namespace: {{ $.Values.namespace }}
   labels:
@@ -128,10 +128,12 @@ spec:
         - '{{ .maxModelLen }}'
         {{- end }}
         {{- /* If productName contains T4, then use float16 and tensor-parallel-size */ -}}
-        {{- if .accelerator.productName | regexMatch "T4" }}
+        {{- with .accelerator }}
+        {{- if .productName | default "" | regexMatch "T4" }}
         - '--dtype'
         - float16
-        - '--tensor-parallel-size={{ .accelerator.max }}'
+        {{- end }}
+        - '--tensor-parallel-size={{ .max | default 1 }}'
         {{- end }}
         - '--distributed-executor-backend=mp'
         {{- if .embeddingsModel }}

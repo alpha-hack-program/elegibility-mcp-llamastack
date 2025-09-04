@@ -1,0 +1,357 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.app }}-documents
+  namespace: {{ .Values.namespace }}
+  labels:
+    component: documents
+    app.kubernetes.io/part-of: {{ $.Values.app }}
+    {{- if .additionalLabels }}
+    {{- range $key, $value := .additionalLabels }}
+    {{ $key }}: "{{ $value }}"
+    {{- end }}
+    {{- end }}
+data:
+  2025-47-SA-Act.md: |
+    ---
+
+    **REPUBLIC OF ARAGONIA**  
+    **MINISTRY OF SOCIAL AFFAIRS AND EMPLOYMENT**
+
+    ---
+
+    # ACT No. 2025/47-SA
+    ## FAMILY CARE UNPAID LEAVE SUPPORT ACT
+
+    **Adopted:** 15 March 2025  
+    **Effective:** 1 April 2025  
+    **Legal Basis:** Constitution of Aragonia, Article 45 (Social Protection); European Social Charter, Article 16 (Social, Economic and Legal Protection of the Family)  
+    **Official Journal Reference:** OJ AR 2025/47, p. 1-8
+
+    ---
+
+    **PREAMBLE**
+
+    The Parliament of the Republic of Aragonia, having regard to the Constitution of Aragonia and in particular Article 45 thereof, having regard to the European Social Charter and the principles of work-life balance established by European Union Directive 2019/1158, and considering the need to support families in times of care responsibilities, hereby adopts this Act.
+
+    ## Article 1 - Purpose and Scope
+
+    This Act establishes financial assistance for employed persons who take unpaid leave to provide direct, continuous, and permanent care for first-degree family members in specific circumstances. The assistance aims to facilitate work-life balance during periods of family care responsibilities.
+
+    ## Article 2 - Eligible Situations
+
+    Financial assistance shall be granted for unpaid leave taken in the following cases:
+
+    ### Case A: First-Degree Family Care (Sick/Injured)
+    Care for first-degree relatives (parents, children, spouse, or partner) who suffer from serious illness or accident requiring hospitalization and necessitating direct, continuous, and permanent care during and/or after the illness or accident.
+
+    ### Case B: Third Child or More with Newborn
+    Care for minor children when the birth concerns the third child or subsequent children, provided that at least two family unit members, including the newborn, are under 6 years of age (or 9 years if they have a disability exceeding 33% and/or recognized dependency).
+
+    ### Case C: Adoption or Foster Care
+    Care for minor children in cases of adoption or foster care arrangements with expected duration exceeding one year.
+
+    ### Case D: Multiple Birth, Adoption, or Foster Care
+    Care for minor children in cases of multiple births, adoptions, or foster care arrangements until children reach 6 years of age (or 9 years if they have a disability exceeding 33% and/or recognized dependency).
+
+    ### Case E: Single-Parent Family with Any Child
+    Care for minor children following birth (first child or subsequent children) for persons certified as single-parent families, until children reach 6 years of age (or 9 years if they have a disability exceeding 33% and/or recognized dependency).
+
+    ## Article 3 - Financial Assistance Amounts
+
+    ### Monthly Assistance Rates
+    - **Case A (Family care for sick/injured)**: €725 per month
+    - **Cases B, C, D, E (Child care situations)**: €500 per month
+
+    ### Proportional Adjustments
+    For part-time employment contracts, assistance shall be proportional to the working hours contributed during the six months prior to application, or for fixed-term discontinuous workers, the 180 days contributed in the immediately preceding year. Minimum eligible workload is 50% of full-time employment.
+
+    ## Article 4 - Eligibility Requirements
+
+    ### Residency Requirements
+    All family unit members must have effective residence in Aragonia for a minimum of two years prior to the start of unpaid leave, or alternatively, effective residence in Aragonia for five continuous years within the seven immediately preceding years.
+
+    **Exceptions**: Residency requirements do not apply to minors in legally constituted foster care, minors under guardianship, or minors joining the family through adoption.
+
+    ### Employment Requirements
+    - **Cases B, C, D**: The applicant must be employed and their spouse/partner must be employed or have absolute incapacity to work
+    - **Cases A, E**: Only the applicant need be employed
+    - **Exclusive custody cases**: Only the applicant need be in unpaid leave situation
+
+    ### Additional Requirements
+    - Applicant must be registered for unpaid leave with social security
+    - Employer must be registered and current with social security
+    - Applicant must have been registered with social security for six months prior to application (or 180 days for fixed-term discontinuous workers)
+    - Current on all tax obligations and social security payments
+    - Family unit income must not exceed specified thresholds based on family size
+
+    ### Income Thresholds
+    - 2-3 family members: ≤ 6 times annual National Minimum Income Standard (14 payments)
+    - 4 family members: ≤ 7 times annual National Minimum Income Standard (14 payments)
+    - 5 family members: ≤ 8 times annual National Minimum Income Standard (14 payments)
+    - 6 family members: ≤ 9 times annual National Minimum Income Standard (14 payments)
+    - Additional family members: +1 National Minimum Income Standard per additional member
+
+    *Note: Persons with recognized disability ≥33% count as two persons for income calculations.*
+
+    ## Article 5 - Application Process
+
+    ### Application Period
+    Applications may be submitted from the day following publication of the annual budget authorization until November 2nd of the current year.
+
+    ### Required Documentation
+    - Identity documents for all family members
+    - Current residence certificate (maximum 3 months old)
+    - Family composition documentation
+    - Employment certificates for applicant and spouse/partner
+    - Company certificate confirming unpaid leave grant
+    - Medical certificates for Cases A (illness/accident documentation)
+    - Income declarations and tax returns
+    - Bank transfer authorization form
+
+    ### Processing Method
+    Applications shall be processed in order of submission on an individual evaluation basis, subject to available budget. Applications received after budget exhaustion shall be denied.
+
+    ## Article 6 - Payment and Duration
+
+    ### Payment Schedule
+    - First payment covers the period from unpaid leave start date to resolution signing
+    - Subsequent payments made monthly in arrears
+    - Payments made via bank transfer to designated account
+
+    ### Maximum Duration
+    - Case A: No specified maximum duration
+    - Cases B, C, D, E: Maximum 12 months per annual call, with possibility of renewal up to three years total for the same qualifying family member
+
+    ### Termination
+    Assistance terminates when eligibility requirements are no longer met.
+
+    ## Article 7 - Compatibility and Restrictions
+
+    ### Incompatible Benefits
+    - Other public assistance for the same purpose and period
+    - Social security benefits for care of minors with cancer or serious illness
+
+    ### Compatible Benefits
+    - Dependency care assistance (subject to maximum amount limitations)
+    - Special Social Security agreements for non-professional caregivers
+
+    ### Single Application Rule
+    Only one application per call permitted, except for extensions of previously granted unpaid leave with temporal continuity.
+
+    ## Article 8 - Obligations and Compliance
+
+    ### Beneficiary Obligations
+    - Report any changes in qualifying circumstances within 15 days
+    - Submit to control activities by competent authorities
+    - Maintain all eligibility requirements throughout assistance period
+
+    ### Reimbursement Requirements
+    Total or partial reimbursement with interest may be required if:
+    - Assistance obtained without meeting required conditions due to beneficiary fault
+    - False information provided
+    - Other causes specified in applicable subsidy legislation
+
+    ## Article 9 - Appeals and Legal Framework
+
+    ### Appeal Process
+    Decisions may be appealed to the Ministry of Social Rights, Social Economy and Employment within one month of notification.
+
+    ### Applicable Law
+    This Act supplements the General Subsidy Law and related regulations of Aragonia.
+
+    ## Article 10 - Implementation
+
+    This Act enters into force upon publication and shall remain valid through 2027, subject to annual budget authorizations and implementing regulations.
+
+    ---
+
+    *This is a fictional document for demonstration purposes only.*
+  2025-47-SA-R1.md: |
+    ---
+
+    **REPUBLIC OF ARAGONIA**  
+    **MINISTRY OF SOCIAL AFFAIRS AND EMPLOYMENT**
+
+    ---
+
+    # REGULATION No. 2025/47-SA-R1
+    ## FAMILY RELATIONSHIP DEFINITIONS FOR UNPAID CARE LEAVE
+    ### Supplementary Regulation to Act No. 2025/47-SA
+
+    **Adopted:** 20 March 2025  
+    **Effective:** 1 April 2025  
+    **Legal Basis:** Act No. 2025/47-SA, Article 2; Constitution of Aragonia, Article 45  
+    **Official Journal Reference:** OJ AR 2025/48, p. 12-16
+
+    ---
+
+    **PREAMBLE**
+
+    This regulation establishes the precise definitions of family relationships eligible for unpaid care leave assistance under the Family Care Unpaid Leave Support Act, ensuring clarity in application and consistent interpretation across all administrative bodies.
+
+    ## Article 1 - Scope and Purpose
+
+    This regulation defines the accepted levels of relationship between the person taking unpaid leave and the person requiring care, as referenced in Article 2 of Act No. 2025/47-SA.
+
+    ## Article 2 - First-Degree Family Relationships by Consanguinity
+
+    ### Direct Line Relationships
+    The following blood relationships qualify as first-degree family relationships:
+
+    #### Parents and Children
+    - **Father** (*padre*): Biological, adoptive, or legally recognized father
+    - **Mother** (*madre*): Biological, adoptive, or legally recognized mother
+    - **Son** (*hijo*): Male child, biological or adoptive
+    - **Daughter** (*hija*): Female child, biological or adoptive
+
+    ### Legal Equivalencies
+    - Adoptive relationships carry the same legal weight as biological relationships
+    - Step-relationships do not qualify unless formal adoption has occurred
+    - Foster relationships qualify only when legal guardianship has been established
+
+    ## Article 3 - First-Degree Family Relationships by Affinity
+
+    ### Spousal Relationships
+    The following marital and partnership relationships qualify:
+
+    #### Legal Marriage
+    - **Spouse** (*cónyuge*): Person legally married under Aragonian civil law
+    - **Husband** (*marido/esposo*): Male spouse in legal marriage
+    - **Wife** (*esposa*): Female spouse in legal marriage
+
+    #### Registered Partnerships
+    - **Partner** (*pareja*): Person in legally registered civil partnership or domestic partnership recognized under Aragonian law
+    - **Civil partner**: Person in registered civil union with equivalent legal status to marriage
+
+    ### Documentation Requirements
+    - Marriage certificate or civil partnership registration
+    - For foreign marriages: Apostilled documents with certified translation
+    - Partnership agreements must be officially registered with competent Aragonian authorities
+
+    ## Article 4 - Extended Family Relationships (Non-Qualifying)
+
+    ### Second-Degree and Beyond
+    The following relationships do **NOT** qualify for unpaid care leave assistance:
+
+    #### Siblings
+    - Brothers and sisters (second-degree consanguinity)
+    - Half-siblings and step-siblings
+
+    #### Grandparents and Grandchildren
+    - Grandparents (second-degree ascendant line)
+    - Grandchildren (second-degree descendant line)
+
+    #### In-Laws
+    - Parents-in-law
+    - Children-in-law
+    - Siblings-in-law
+
+    #### Other Relatives
+    - Aunts, uncles, cousins
+    - Nephews and nieces
+    - Any relationship beyond first degree
+
+    ## Article 5 - Special Circumstances and Clarifications
+
+    ### Legal Guardianship and Foster Care
+    - **Legal Guardian**: Person with court-appointed guardianship over a minor qualifies as equivalent to parent-child relationship
+    - **Foster Parent**: Qualified only when official foster care placement exceeds one year duration
+    - **Ward**: Minor under official guardianship is treated as child for relationship purposes
+
+    ### Unmarried Partnerships
+    - **Cohabiting Partners**: Must demonstrate stable cohabitation for minimum 2 years with shared residence and financial interdependence
+    - **Common-Law Relationships**: Require official declaration before competent authorities
+    - Documentary proof required: joint lease agreements, shared bank accounts, witness statements
+
+    ### Same-Sex Relationships
+    - All relationship definitions apply equally regardless of gender or sexual orientation
+    - Same-sex marriages and partnerships carry identical rights and obligations
+
+    ## Article 6 - Proof of Relationship
+
+    ### Required Documentation
+    Applicants must provide appropriate documentation to establish qualifying relationship:
+
+    #### For Consanguinity
+    - Birth certificates showing direct lineage
+    - Adoption decrees (certified copies)
+    - DNA testing (in disputed cases, at administrative discretion)
+
+    #### For Affinity
+    - Marriage certificates
+    - Civil partnership registration
+    - Cohabitation declarations with supporting evidence
+
+    #### For Legal Guardianship
+    - Court orders establishing guardianship
+    - Foster care placement agreements
+    - Child welfare authority certifications
+
+    ### Foreign Documentation
+    - Documents issued outside Aragonia require apostille certification
+    - Non-Aragonian language documents require certified translation by court-appointed translator
+    - Consular authentication may be required for certain jurisdictions
+
+    ## Article 7 - Disputed Relationships
+
+    ### Administrative Review
+    - Relationship disputes subject to review by Family Relations Assessment Board
+    - Appeals process available within 30 days of negative determination
+    - Independent verification procedures may be implemented
+
+    ### Burden of Proof
+    - Applicant bears responsibility for proving qualifying relationship
+    - Clear and convincing evidence standard applies
+    - Administrative authorities may request additional documentation
+
+    ## Article 8 - Effective Date and Transitional Provisions
+
+    ### Implementation
+    - This regulation takes effect simultaneously with Act No. 2025/47-SA
+    - Applications submitted prior to effective date evaluated under previous standards
+    - No retroactive application to closed cases
+
+    ### Review and Updates
+    - Regulation subject to periodic review every 3 years
+    - Updates published in Official Journal with 30-day implementation period
+
+    ## Article 9 - Interpretative Guidelines
+
+    ### Principle of Family Unity
+    - Definitions should be interpreted to support legitimate family care needs
+    - Cultural and social diversity in family structures given appropriate consideration
+    - Best interests of care recipients considered in borderline cases
+
+    ### Legal Certainty
+    - Clear documentation requirements ensure predictable outcomes
+    - Standardized forms and procedures minimize administrative discretion
+    - Regular training for administrative personnel on relationship definitions
+
+    ---
+
+    **ANNEX A - RELATIONSHIP VERIFICATION FLOWCHART**
+
+    ```
+    RELATIONSHIP QUALIFICATION PROCESS
+    │
+    ├── CONSANGUINITY (Blood Relations)
+    │   ├── Parent → Child: QUALIFIED ✓
+    │   ├── Child → Parent: QUALIFIED ✓
+    │   └── Siblings/Other: NOT QUALIFIED ✗
+    │
+    ├── AFFINITY (Marriage/Partnership)
+    │   ├── Legal Spouse: QUALIFIED ✓
+    │   ├── Registered Partner: QUALIFIED ✓
+    │   ├── Cohabiting Partner (2+ years): QUALIFIED ✓
+    │   └── Dating/Casual: NOT QUALIFIED ✗
+    │
+    └── LEGAL GUARDIANSHIP
+        ├── Court-Appointed Guardian: QUALIFIED ✓
+        ├── Foster Parent (1+ year): QUALIFIED ✓
+        └── Informal Care: NOT QUALIFIED ✗
+    ```
+
+    ---
+
+    *This is a fictional document for demonstration purposes only.*

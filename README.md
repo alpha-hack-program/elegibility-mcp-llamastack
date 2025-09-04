@@ -74,8 +74,8 @@ This example was tested on Red Hat OpenShift 4.16.24 & Red Hat OpenShift AI v2.1
 ### Clone
 
 ```
-git clone https://github.com/rh-ai-quickstart/llm-cpu-serving.git && \
-    cd llm-cpu-serving/  
+git clone https://github.com/alpha-hack-program/elegibility-mcp-llamastack.git && \
+    cd elegibility-mcp-llamastack/
 ```
 
 
@@ -99,8 +99,7 @@ oc label namespace ${PROJECT} modelmesh-enabled=false opendatahub.io/dashboard=t
 ### Install with Helm
 
 ```
-helm install elegibility-mcp-llamastack helm/ \
-    --namespace ${PROJECT} 
+helm install elegibility-mcp-llamastack helm/ --namespace ${PROJECT} 
 ```
 
 ### Wait for pods
@@ -135,7 +134,7 @@ Finally, you can create a new Workspace in AnythingLLM and start chatting with y
 ## Example queries
 
 - My mother had an accident and she's at the hospital, I have to take care of her, can I get access to the unpaid leave aid?
-- I have just adoopted two children aged 3 and 5, am I elegible for the unpaid leave aid?
+- I have just adopted two children at the same time, aged 3 and 5, am I elegible for the unpaid leave aid?
 - I'm a single mom and I just had a baby, may I get access to the unpaid leave aid?
 
 ## Uninstall

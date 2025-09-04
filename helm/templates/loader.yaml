@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.app }}-loader-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.app }}
+    app.kubernetes.io/name: {{ include "rag-lsd.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Values.partOf }}
+data:
+  EMBEDDING_MODEL: "{{ .Values.lsdEmbeddingModel }}"
+  EMBEDDING_DIMENSION: {{ .Values.lsdEmbeddingDimension | toString | quote }}
+  EMBEDDING_MODEL_PROVIDER: "{{ .Values.lsdEmbeddingModelProvider }}"
+  LLAMA_STACK_HOST: "{{ .Values.app }}-service"
+  LLAMA_STACK_PORT: {{ .Values.lsdPort | toString | quote }}
+  LLAMA_STACK_SECURE: "False"
+  DOCS_FOLDER: "{{ .Values.docsFolder }}"
+  CHUNK_SIZE_IN_TOKENS: "256"
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.app }}-loader-{{ randAlphaNum 5 | lower }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.app }}
+    app.kubernetes.io/name: {{ include "rag-lsd.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Values.partOf }}
+    app.kubernetes.io/component: loader
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app }}
+        app.kubernetes.io/name: {{ include "rag-lsd.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/part-of: {{ .Values.partOf }}
+        app.kubernetes.io/component: loader
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: loader
+        image: "{{ .Values.loaderImage }}"
+        imagePullPolicy: Always
+        args:
+        - --delay
+        - {{ .Values.loaderDelay | toString | quote }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.app }}-loader-config
+        volumeMounts:
+        - name: docs-volume
+          mountPath: "{{ .Values.docsFolder }}"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      volumes:
+      - name: docs-volume
+        configMap:
+          name: {{ .Values.app }}-documents
+  backoffLimit: 50

@@ -9,8 +9,17 @@ lsdImage: quay.io/opendatahub/llama-stack:odh
 lsdPlaygroundImage: quay.io/rh-aiservices-bu/llama-stack-playground:0.2.11
 lsdPort: 8321
 
+lsdEmbeddingModel: granite-embedding-125m
+lsdEmbeddingDimension: 768
+lsdEmbeddingModelProvider: sentence-transformers
+
+loaderImage: quay.io/atarazana/rag-loader:0.1.1
+loaderDelay: 10
+
 milvusDbPath: /tmp/milvus.db
 fmsOchestratorUrl: http://localhost:8080
+
+docsFolder: /data/docs
 
 models:
   # - name: granite-3-3-8b
@@ -73,7 +82,7 @@ models:
       - /app/data/template/tool_chat_template_llama3.1_json.jinja
 
 mcpServers:
-  - id: mcp::bon-elegibility-engine
+  - id: mcp::elegibility-engine
     provider_id: model-context-protocol
     runtime: rust
     vcs:

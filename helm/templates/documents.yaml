@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     component: documents
-    app.kubernetes.io/part-of: {{ $.Values.app }}
+    app.kubernetes.io/part-of: {{ $.Values.partOf }}
     {{- if .additionalLabels }}
     {{- range $key, $value := .additionalLabels }}
     {{ $key }}: "{{ $value }}"

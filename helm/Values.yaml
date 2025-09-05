@@ -75,9 +75,9 @@ models:
           memory: 24Gi
     accelerator:
       type: nvidia.com/gpu
-      # type: gaudi.com/gpu
-      max: '2'
-      min: '2'
+      # type: habana.ai/gaudi
+      max: '1'
+      min: '1'
       productName: NVIDIA-A10G-SHARED
       # productName: T4-SHARED
     args:

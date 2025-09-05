@@ -33,48 +33,52 @@ spec:
         name: {{ default "vLLM" .format }}
       name: ''
       runtime: {{ .name }}
-      {{/* If model.image is set, it will override the connection, else it will use the connection */}}
+      {{- /* If model.image is set, it will override the connection, else it will use the connection */ -}}
       {{- if .image }}
       storageUri: 'oci://{{ .image }}'
       {{- else }}
       storage:
         key: aws-connection-{{ .connection.name }}
         path: "{{ printf "%s/%s" .root .id }}"
-      {{- end }}  
+      {{- end }}
+      {{- if or .runtime .accelerator }}
       resources:
-        {{/* If any or accelator max or limits are set, then the limits will be set accordingly */}}
-        {{- if or .accelerator.max .runtime.resources.limits.cpu .runtime.resources.limits.memory }}
+        {{- /* If any or accelator max or limits are set, then the limits will be set accordingly */ -}}
+        {{- if or (and .accelerator .accelerator.max) (and .runtime .runtime.resources .runtime.resources.limits) }}
         limits:
-          {{- if .accelerator.max }}    
+          {{- if and .accelerator .accelerator.max }}    
           {{ .accelerator.type }}: '{{ .accelerator.max }}'
           {{- end }}
-          {{- if .runtime.resources.limits.cpu }}
+          {{- if and .runtime .runtime.resources .runtime.resources.limits .runtime.resources.limits.cpu }}
           cpu: '{{ .runtime.resources.limits.cpu }}'
           {{- end }}
-          {{- if .runtime.resources.limits.memory }}
+          {{- if and .runtime .runtime.resources .runtime.resources.limits .runtime.resources.limits.memory }}
           memory: '{{ .runtime.resources.limits.memory }}'
           {{- end }}
         {{- end }}
+        {{- if and .runtime .runtime.resources .runtime.resources.requests }}
         requests:
-          # If any or accelator min or requests are set, then the requests will be set accordingly
-          {{- if or .accelerator.min .runtime.resources.requests.cpu .runtime.resources.requests.memory }}
-          {{- if .accelerator.min }}
+          {{- /* If any or accelator min or requests are set, then the requests will be set accordingly */ -}}
+          {{- if or (and .accelerator .accelerator.min) (and .runtime .runtime.resources .runtime.resources.requests .runtime.resources.requests.cpu) (and .runtime .runtime.resources .runtime.resources.requests .runtime.resources.requests.memory) }}
+          {{- if and .accelerator .accelerator.min }}
           {{ .accelerator.type }}: '{{ .accelerator.min }}'
           {{- end }}
-          {{- if .runtime.resources.requests.cpu }}
+          {{- if and .runtime .runtime.resources .runtime.resources.requests .runtime.resources.requests.cpu }}
           cpu: '{{ .runtime.resources.requests.cpu }}'
           {{- end }}
-          {{- if .runtime.resources.requests.memory }}
+          {{- if and .runtime .runtime.resources .runtime.resources.requests .runtime.resources.requests.memory }}
           memory: '{{ .runtime.resources.requests.memory }}'
           {{- end }}
           {{- end }}
-    {{- if .accelerator.min }}
+        {{- end }}
+      {{- end }}
+    {{- if and .accelerator .accelerator.min }}
     tolerations:
       - effect: NoSchedule
-        key: nvidia.com/gpu
+        key: {{ .accelerator.type }}
         operator: Exists
     {{- end }}
-    {{- if .accelerator.productName }}
+    {{- if and .accelerator .accelerator.productName }}
     nodeSelector:
       {{ .accelerator.type }}.product: {{ .accelerator.productName }}
     {{- end }}
@@ -106,10 +110,16 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
     opendatahub.io/accelerator-name: migrated-gpu
     opendatahub.io/apiProtocol: {{ default "REST" .apiProtocol }}
+    {{- if and .runtime .runtime.templateDisplayName }}
     opendatahub.io/template-display-name: "{{ .runtime.templateDisplayName }}"
+    {{- end }}
+    {{- if and .runtime .runtime.templateName }}
     opendatahub.io/template-name: "{{ .runtime.templateName }}"
+    {{- end }}
     openshift.io/display-name: "{{ .displayName }}"
+    {{- if and .accelerator .accelerator.type }}
     opendatahub.io/recommended-accelerators: '["{{ .accelerator.type }}"]'
+    {{- end }}
   name: {{ .name }}
   namespace: {{ $.Values.namespace }}
   labels:
@@ -162,7 +172,12 @@ spec:
           value: /tmp/hf_home
         - name: VLLM_CACHE_ROOT
           value: /tmp
+      {{- if and .runtime .runtime.image }}
       image: '{{ .runtime.image }}'
+      {{- else }}
+      # Default image if runtime.image is not specified
+      image: 'quay.io/modh/vllm:latest'
+      {{- end }}
       name: kserve-container
       ports:
         - containerPort: 8080

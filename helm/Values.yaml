@@ -80,6 +80,9 @@ models:
       min: '1'
       productName: NVIDIA-A10G-SHARED
       # productName: T4-SHARED
+    env:
+      - name: VLLM_SKIP_WARMUP
+          value: "true" "
     args:
       - --enable-auto-tool-choice
       - --tool-call-parser
@@ -108,4 +111,4 @@ mcpServers:
         memory: 256Mi
       requests:
         cpu: 250m
-        memory: 1280Mi
+        memory: 128Mi

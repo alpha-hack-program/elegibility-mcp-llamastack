@@ -172,6 +172,12 @@ spec:
           value: /tmp/hf_home
         - name: VLLM_CACHE_ROOT
           value: /tmp
+        {{- if .env }}
+        {{- range .env }}
+        - name: {{ .name }}
+          value: {{ .value }}
+        {{- end }}
+        {{- end }}
       {{- if and .runtime .runtime.image }}
       image: '{{ .runtime.image }}'
       {{- else }}

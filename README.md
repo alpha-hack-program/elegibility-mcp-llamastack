@@ -164,6 +164,35 @@ oc get routes elegibility-lsd -n ${PROJECT}
 
 Use this endpoint to integrate the eligibility assessment capabilities into your applications.
 
+## Business Rules
+
+### Unpaid Leave Evaluation Data
+
+| Family relationship | Situation | Single-parent family | Number of children | Potentially eligible | Monthly benefit | Case | Description | Output | DESCRIPTION | Rule ID |
+|---------------------|-----------|---------------------|-------------------|---------------------|----------------|------|-------------|--------|-------------|---------|
+| true | delivery, birth | true | | true | 500 | E | Single-parent family with newborn | The single-parent status must be documented | Case E: Single-parent family with any child | regla-005 |
+| true | delivery, birth | | >=3 | true | 500 | B | Third child or more with newborn | The number of children must be 3 or more, the ages of at least 2 of the minors must be less than 6, if there is disability greater than 33% then the limit is 9 years | Case B: Third child or more with newborn | regla-002 |
+| true | delivery, birth | | | false | 0 | B | The number of children must be 3 or more, must consult with administration | | The number of children must be 3 or more, must consult with administration | 9ec43eb2-484f-4fcf-9dd7-6510da30850c |
+| true | illness, accident | | | true | 725 | A | First-degree family care sick or accident victim | The person must have been hospitalized and the care of the person must be continued | Case A: First-degree family care sick/injured | regla-001 |
+| true | adoption, foster_care | | | true | 500 | C | Adoption or foster care | In the foster care case the duration must be longer than one year | Case C: Adoption or foster care | regla-003 |
+| true | multiple_birth, multiple_delivery, multiple_adoption, multiple_foster_care | | | true | 500 | D | Delivery, adoption or foster care multiple | | Case D: Delivery, adoption or foster care multiple | regla-004 |
+| true | | | | false | 0 | NONE | No case applies | | No case applies | 515afd1f-43cc-44ed-971c-fefb273840b2 |
+| false | | | | false | 0 | NONE | Not applicable by relationship (first degree) | | Only father, mother, son, daughter, spouse or partner are accepted | 058dd988-90dd-46da-8478-ee458aacde6f |
+| | | | | false | 0 | NONE | UNKNOWN_ERROR | | | f32bfb0f-801d-4d6c-b5bd-13a1edd0eaca |
+
+### Summary
+
+This table contains the evaluation criteria and outcomes for unpaid leave assistance eligibility. The data shows different cases (A through E) with varying monthly benefits:
+
+- **Case A**: First-degree family care sick/injured - 725€
+- **Case B**: Third child or more with newborn - 500€  
+- **Case C**: Adoption or foster care - 500€
+- **Case D**: Multiple delivery/adoption/foster care - 500€
+- **Case E**: Single-parent family with any child - 500€
+- **NONE**: Cases where no assistance applies - 0€
+
+The table includes input parameters (family relationship, situation, single-parent status, number of children) and corresponding outputs (eligibility, benefit amount, case classification, descriptions, and rule IDs).
+
 ## Example queries
 
 - My mother had an accident and she's at the hospital, I have to take care of her, can I get access to the unpaid leave aid?
